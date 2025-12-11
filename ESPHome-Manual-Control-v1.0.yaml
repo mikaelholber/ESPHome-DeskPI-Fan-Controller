@@ -1,0 +1,136 @@
+substitutions:
+  friendly_name: Homelab Fan
+
+esphome:
+  name: homelab
+  comment: ESP32 Temperature and Fan Controller
+
+# Throttle writing parameters to the internal flash memory to reduce ESP memory wear / degradation
+preferences:
+  flash_write_interval: 15min
+
+# Version of the board
+esp32:
+  variant: esp32s3
+
+# Enable logging
+logger:
+  level: DEBUG
+
+# Enable Home Assistant API
+api:
+  port: 6053
+  batch_delay: 50ms  # Reduce latency for real-time applications
+  listen_backlog: 2  # Allow 2 pending connections in queue
+  max_connections: 6  # Allow up to 6 simultaneous connections
+  max_send_queue: 10  # Maximum queued messages per connection before disconnect
+
+ota:
+  - platform: esphome
+  
+# WiFi connection to network
+wifi:
+  ssid: YOUR_SSID
+  password: YOUR_CODE
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "HomeLab-Fallback-Temp"
+    password: "TESTPASS"
+
+captive_portal:
+
+# BME280 Temperature sensor specific configurations
+i2c:
+  sda: GPIO04
+  scl: GPIO05
+  scan: true
+  id: bus_a
+
+# BME280 Temperature sensor
+sensor:
+  - platform: bme280_i2c
+    temperature:
+      name: "HomeLab Temperature"
+      oversampling: 16x
+    pressure:
+      name: "HomeLab Pressure"
+    humidity:
+      name: "HomeLab Humidity"
+    address: 0x76
+    update_interval: 60s
+
+####################
+# Fan RPM counters #
+####################
+  - platform: pulse_counter
+    pin: 
+      number: GPIO17   # Connect to any input PIN on the ESP
+      mode: INPUT_PULLUP
+    unit_of_measurement: 'RPM'
+    id: fan_1_speed
+    name: Fan Speed 1
+    accuracy_decimals: 0
+    filters:
+      - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
+
+  - platform: pulse_counter
+    pin: 
+      number: GPIO18   # Connect to any input PIN on the ESP
+      mode: INPUT_PULLUP
+    unit_of_measurement: 'RPM'
+    id: fan_2_speed
+    name: Fan Speed 2
+    accuracy_decimals: 0
+    filters:
+      - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
+
+  - platform: template
+    name: "Fan Speed (PWM Voltage)"
+    unit_of_measurement: "%"
+    id: fan_speed_pwm_voltage
+
+########################
+# Fan speed controller #
+########################
+output:
+  # Wire this pin (16) into the PWM pin of your 5v fan
+  # ledc is the name of the pwm output system on an esp32
+  - platform: ledc
+    id: fan_speed
+    pin: GPIO16
+
+    # 25KHz is standard PC fan frequency, minimises buzzing
+    frequency: "25000 Hz" 
+
+    # my fans stop working below 13% powerful.
+    # also they're  powerful and loud, cap their max speed to 80%
+    min_power: 13%
+    max_power: 80%
+
+    # At 0, actually turn it off, otherwise the power keeps going.
+    zero_means_zero: true
+
+  - platform: template
+    id: proxy_output
+    type: float
+    write_action:
+      lambda: |-
+        float write_val = 
+          (id(manual_fan_control).state) ?
+            id(manual_fan_control).speed / 100.0 : state*1.0;
+        id(fan_speed).set_level(write_val);
+        id(fan_speed_pwm_voltage).publish_state(write_val*100.0);
+
+# If you turn this on, you can manually set the fan speed.
+# The PID will be ignored. This is done via the proxy_output
+fan:
+  - platform: speed
+    id: manual_fan_control
+    output: proxy_output
+    name: "Manual Fan Speed"
+    restore_mode: ALWAYS_ON # Always boot up with the fan running
+
+# Webserver portal
+web_server:
+  port: 80
