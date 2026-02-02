@@ -39,6 +39,18 @@ wifi:
     password: "TESTPASS"
 
 captive_portal:
+text_sensor:
+
+  # Send IP Address
+  - platform: wifi_info
+    ip_address:
+      name: $friendly_name IP Address
+
+  # Send Uptime in raw seconds
+  - platform: template
+    name: $friendly_name Uptime
+    id: uptime_human
+    icon: mdi:clock-start
 
 # BME280 Temperature sensor specific configurations
 i2c:
@@ -51,21 +63,22 @@ i2c:
 sensor:
   - platform: bme280_i2c
     temperature:
-      name: "HomeLab Temperature"
+      name: $friendly_name Temperature
+      id: homelab_fan_temperature
       oversampling: 16x
     pressure:
-      name: "HomeLab Pressure"
+      name: $friendly_name Pressure
     humidity:
-      name: "HomeLab Humidity"
-    address: 0x76
-    update_interval: 60s
+      name: $friendly_name Humidity
+    address: 0x77
+    update_interval: 30s
 
 ####################
 # Fan RPM counters #
 ####################
   - platform: pulse_counter
     pin: 
-      number: GPIO17   # Connect to any input PIN on the ESP
+      number: GPIO1   # Connect to any input PIN on the ESP
       mode: INPUT_PULLUP
     unit_of_measurement: 'RPM'
     id: fan_1_speed
@@ -76,7 +89,7 @@ sensor:
 
   - platform: pulse_counter
     pin: 
-      number: GPIO18   # Connect to any input PIN on the ESP
+      number: GPIO2   # Connect to any input PIN on the ESP
       mode: INPUT_PULLUP
     unit_of_measurement: 'RPM'
     id: fan_2_speed
@@ -85,10 +98,48 @@ sensor:
     filters:
       - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
 
+  - platform: pulse_counter
+    pin: 
+      number: GPIO17   # Connect to any input PIN on the ESP
+      mode: INPUT_PULLUP
+    unit_of_measurement: 'RPM'
+    id: fan_3_speed
+    name: Fan Speed 3
+    accuracy_decimals: 0
+    filters:
+      - multiply: 0.5  # Depending on how many pulses the fan sends per round - should be 0.5 or 1 - try...
+
   - platform: template
     name: "Fan Speed (PWM Voltage)"
     unit_of_measurement: "%"
     id: fan_speed_pwm_voltage
+
+###################################
+# Report uptime to Home Assistant #
+###################################
+  - platform: uptime
+    name: $friendly_name Uptime
+    id: uptime_sensor
+    update_interval: 60s
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: uptime_human
+            # Custom C++ code to generate the result
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              return (
+                (days ? to_string(days) + "d " : "") +
+                (hours ? to_string(hours) + "h " : "") +
+                (minutes ? to_string(minutes) + "m " : "") +
+                (to_string(seconds) + "s")
+              ).c_str();
 
 ########################
 # Fan speed controller #
@@ -129,7 +180,26 @@ fan:
     id: manual_fan_control
     output: proxy_output
     name: "Manual Fan Speed"
-    restore_mode: ALWAYS_ON # Always boot up with the fan running
+    restore_mode: ALWAYS_ON
+
+switch:
+  # Expose an ESP32 restart button to HA
+  - platform: restart
+    name: ${friendly_name} ESP32 Restart
+    id: homelab_fan_restart
+
+# Restart every day at 12:30am. 
+# I've had some memory issues lockup 
+# the device after a couple weeks
+time:
+  - platform: homeassistant
+    on_time:
+      # Every morning at 12:30am
+    - seconds: 0
+      minutes: 30
+      hours: 0
+      then:
+       - switch.turn_on: homelab_fan_restart
 
 # Webserver portal
 web_server:
