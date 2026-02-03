@@ -37,9 +37,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.8,
-          "height": 1.27,
-          "width": 2.54
+          "drill": 0.7,
+          "height": 0.7,
+          "width": 0.7
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -48,7 +48,7 @@
         "silk_text_thickness": 0.1,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.5
+          "min_clearance": 0.0
         }
       },
       "diff_pair_dimensions": [
@@ -58,7 +58,44 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        [
+          "annular_width|31840000|11730000|d1f92f46-3f60-4cfc-89cf-ef65cafbd9fc|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "annular_width|31840000|24730000|ef5274e2-61bd-4e11-aa0c-04d93aaa8726|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "annular_width|7160000|14270000|3e69a857-cfb2-497f-adfe-65942b0c430c|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "annular_width|7160000|27270000|62919e1e-7cc5-43fc-9091-45e934a4f642|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "lib_footprint_mismatch|19463433|35000000|b174ed20-23b6-4f74-bca2-26295032eedd|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "padstack|31840000|11730000|d1f92f46-3f60-4cfc-89cf-ef65cafbd9fc|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "padstack|31840000|24730000|ef5274e2-61bd-4e11-aa0c-04d93aaa8726|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "padstack|7160000|14270000|3e69a857-cfb2-497f-adfe-65942b0c430c|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "padstack|7160000|27270000|62919e1e-7cc5-43fc-9091-45e934a4f642|00000000-0000-0000-0000-000000000000",
+          ""
+        ]
+      ],
       "meta": {
         "version": 2
       },
@@ -188,6 +225,7 @@
       ],
       "track_widths": [
         0.0,
+        0.3,
         0.5,
         1.0
       ],
@@ -453,7 +491,7 @@
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "warning",
+      "pin_to_pin": "error",
       "power_pin_not_driven": "error",
       "same_local_global_label": "warning",
       "similar_label_and_power": "warning",
@@ -474,7 +512,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "DeskPi 40mm Dual Fan Controller.kicad_pro",
+    "filename": "DeskPi-40mm-fan-controller-v4.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -510,10 +548,10 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "Fab-version-5/Gerber/",
-      "pos_files": "Fab-version-5/PickNPlace/",
+      "plot": "../Export/",
+      "pos_files": "",
       "specctra_dsn": "",
-      "step": "DeskPi 40mm Dual Fan Controller.stl",
+      "step": "",
       "svg": "",
       "vrml": ""
     },
@@ -583,13 +621,37 @@
           "label": "Datasheet",
           "name": "Datasheet",
           "show": true
+        },
+        {
+          "group_by": false,
+          "label": "Sim.Pins",
+          "name": "Sim.Pins",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "LCSC Part",
+          "name": "LCSC Part",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Description",
+          "name": "Description",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "#",
+          "name": "${ITEM_NUMBER}",
+          "show": false
         }
       ],
       "filter_string": "",
       "group_symbols": true,
       "include_excluded_from_bom": true,
-      "name": "Default Editing",
-      "sort_asc": true,
+      "name": "",
+      "sort_asc": false,
       "sort_field": "Reference"
     },
     "connection_grid_size": 50.0,
@@ -601,7 +663,7 @@
       "field_names": [],
       "intersheets_ref_own_page": false,
       "intersheets_ref_prefix": "",
-      "intersheets_ref_short": false,
+      "intersheets_ref_short": true,
       "intersheets_ref_show": false,
       "intersheets_ref_suffix": "",
       "junction_size_choice": 3,
@@ -621,7 +683,7 @@
     },
     "net_format_name": "",
     "page_layout_descr_file": "",
-    "plot_directory": "",
+    "plot_directory": "Review1/",
     "space_save_all_events": true,
     "spice_current_sheet_as_root": false,
     "spice_external_command": "spice \"%I\"",
@@ -634,7 +696,7 @@
   },
   "sheets": [
     [
-      "72bc51f1-09ca-4821-9068-626f799268da",
+      "84bce274-0d1c-4624-b5e9-f81418d2856d",
       "Root"
     ]
   ],
