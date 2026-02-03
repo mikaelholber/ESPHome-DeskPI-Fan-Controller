@@ -48,5 +48,6 @@ I have 4 automations controlling the fans:
 3. Set HIGH speed if the temperature goes above a certain temperature (See High-speed.yaml)
 4. Set LOW speed if the temperature goes down again (See Low-speed.yaml)
 
-
+# Purchasing boards
+You can order boards in EU from me on Tindie: https://www.tindie.com/products/holber/minilab-esp-home-fan-controller-40x40mm
 
