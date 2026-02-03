@@ -1,0 +1,37 @@
+alias: High Speed
+description: ""
+triggers:
+  - trigger: numeric_state
+    entity_id:
+      - sensor.vanilla_cpu_thermal_0_temperature
+      - sensor.caramel_cpu_thermal_0_temperature
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    above: 55
+conditions: []
+actions:
+  - if:
+      - condition: time
+        after: "07:00:00"
+        before: "19:30:00"
+    then:
+      - action: fan.set_percentage
+        metadata: {}
+        data:
+          percentage: 100
+        target:
+          entity_id:
+            - fan.homelab_3_output_manual_fan_speed
+            - fan.homelab_3_intake_manual_fan_speed
+    else:
+      - action: fan.set_percentage
+        metadata: {}
+        data:
+          percentage: 60
+        target:
+          entity_id:
+            - fan.homelab_3_output_manual_fan_speed
+            - fan.homelab_3_intake_manual_fan_speed
+mode: single
